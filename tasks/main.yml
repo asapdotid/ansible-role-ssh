@@ -1,55 +1,41 @@
 ---
 # tasks file for role-ssh
-- name: Set SSH private key
+- name: SSH | Set SSH private key
   set_fact:
     string_in_base64: "{{ private__key }}"
 
-- name: Check SSH directory exists.
-  stat:
+- name: SSH | Check SSH directory exists.
+  ansible.builtin.stat:
     path: ~/.ssh
   register: ssh_dir
 
-- name: Create ssh directory.
+- name: SSH | Create ssh directory.
   ansible.builtin.file:
     path: ~/.ssh
     state: directory
     mode: "0700"
   when: not ssh_dir.stat.exists
 
-- name: Check file
-  stat:
+- name: SSH | Check id_rsa file
+  ansible.builtin.stat:
     path: ~/.ssh/id_rsa
-  register: id_rsa_result
+  register: id_rsa_file
 
-- name: Load data
-  slurp:
-    src: ~/.ssh/id_rsa
-  when: id_rsa_result.stat.exists
-  register: mounts_id_rsa
-
-- name: debug output
-  ansible.builtin.debug:
-    var: mounts_id_rsa
-
-- name: Touch file and append decode content
-  copy:
-    dest: ~/.ssh/id_rsa
-    content: "{{ string_in_base64 | b64decode }}"
-  when: not id_rsa_result.stat.exists
-
-- name: Check data private key
-  copy:
-    dest: ~/.ssh/id_rsa
-    content: "{{ string_in_base64 | b64decode }}"
-  when: string_in_base64 not in item and id_rsa_result.stat.exists
-  with_items:
-    - "{{ mounts_id_rsa['content'] }}"
-
-- name: Change ssh private key file permissions
+- name: SSH | Create a id_rsa file
   ansible.builtin.file:
     path: ~/.ssh/id_rsa
+    state: touch
     owner: root
     group: root
     mode: "0600"
-  notify:
-    - restart sshd
+  when: not id_rsa_file.stat.exists
+
+- name: SSH | Copy private key
+  ansible.builtin.copy:
+    content: "{{ string_in_base64 | b64decode }}"
+    dest: ~/.ssh/id_rsa
+    owner: root
+    group: root
+    mode: "0600"
+  when: id_rsa_file.stat.exists and (string_in_base64 != '')
+  notify: restart sshd
