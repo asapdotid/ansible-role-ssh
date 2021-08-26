@@ -29,11 +29,9 @@ None
 
 ## Role Variables
 
-Available variables are listed below, along with default values (see `defaults/main.yml`):
-
-    private__key: ""
-
-Private key with `base64 encode` string
+| Name           | Default Value | Description                              |
+| -------------- | ------------- | ---------------------------------------- |
+| `private__key` | `""`          | Private key with `base64 encode` string. |
 
 ## Dependencies
 
