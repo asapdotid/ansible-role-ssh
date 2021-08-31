@@ -64,4 +64,4 @@ MIT / BSD
 
 [JogjaScript](https://jogjascript.com)
 
-This role was created in 2021 by [Asapdotid](https://jogjanode.com/).
+This role was created in 2021 by [Asapdotid](https://github.com/asapdotid).
