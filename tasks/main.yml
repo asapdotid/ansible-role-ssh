@@ -1,41 +1,45 @@
 ---
 # tasks file for role-ssh
-- name: SSH | Set SSH private key
-  set_fact:
-    string_in_base64: "{{ private__key }}"
-
 - name: SSH | Check SSH directory exists.
   ansible.builtin.stat:
-    path: ~/.ssh
+    path: "/home/{{ item.user }}/.ssh"
   register: ssh_dir
+  with_items: "{{ setup_user_ssh }}"
 
 - name: SSH | Create ssh directory.
   ansible.builtin.file:
-    path: ~/.ssh
+    path: "/home/{{ item.item.user }}/.ssh"
     state: directory
+    owner: "{{ item.item.user }}"
+    group: "{{ item.item.group }}"
+    recurse: yes
     mode: "0700"
-  when: not ssh_dir.stat.exists
+  with_items: "{{ ssh_dir.results }}"
+  when: not item.stat.exists
 
 - name: SSH | Check id_rsa file
   ansible.builtin.stat:
-    path: ~/.ssh/id_rsa
+    path: "/home/{{ item.user }}/.ssh/id_rsa"
+  with_items: "{{ setup_user_ssh }}"
   register: id_rsa_file
 
 - name: SSH | Create a id_rsa file
   ansible.builtin.file:
-    path: ~/.ssh/id_rsa
+    path: "/home/{{ item.item.user }}/.ssh/id_rsa"
     state: touch
-    owner: root
-    group: root
+    owner: "{{ item.item.user }}"
+    group: "{{ item.item.group }}"
     mode: "0600"
-  when: not id_rsa_file.stat.exists
+  with_items: "{{ id_rsa_file.results }}"
+  when: not item.stat.exists
 
 - name: SSH | Copy private key
   ansible.builtin.copy:
-    content: "{{ string_in_base64 | b64decode }}"
-    dest: ~/.ssh/id_rsa
-    owner: root
-    group: root
+    content: "{{ item.item.private_key | b64decode }}"
+    dest: "/home/{{ item.item.user }}/.ssh/id_rsa"
+    owner: "{{ item.item.user }}"
+    group: "{{ item.item.group }}"
     mode: "0600"
-  when: id_rsa_file.stat.exists and (string_in_base64 != '')
+  with_items: "{{ id_rsa_file.results }}"
+  when: item.stat.exists and (item.item.private_key != '')
   notify: restart sshd

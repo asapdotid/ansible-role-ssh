@@ -1,3 +1,7 @@
 ---
 # defaults file for role-ssh
-private__key: ""
+setup_user_ssh:
+  []
+  # - user: ""
+  #   group: ""
+  #   private_key: ""
