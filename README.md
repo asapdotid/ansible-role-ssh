@@ -29,9 +29,9 @@ None
 
 ## Role Variables
 
-| Name           | Default Value | Description                              |
-| -------------- | ------------- | ---------------------------------------- |
-| `private__key` | `""`          | Private key with `base64 encode` string. |
+| Name             | Default Value | Description                                              |
+| ---------------- | ------------- | -------------------------------------------------------- |
+| `setup_user_ssh` | `[]`          | Setup multiple ssh directory with private key and owner. |
 
 ## Dependencies
 
@@ -41,9 +41,20 @@ None.
 
 Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
 
-    - hosts: servers
-      roles:
-         - { role: asapdotid.ssh }
+```yaml
+- hosts: servers
+  vars:
+    setup_user_ssh:
+      - name: "root"
+        group: "root"
+        private_key: "private key with base64 encode"
+      - name: "vagrant"
+        group: "vagrant"
+        private_key: "private key with base64 encode"
+
+  roles:
+    - { role: asapdotid.ssh }
+```
 
 ## License
 
