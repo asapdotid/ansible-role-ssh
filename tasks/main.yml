@@ -43,3 +43,19 @@
   with_items: "{{ id_rsa_file.results }}"
   when: item.stat.exists and (item.item.private_key != '')
   notify: restart sshd
+
+- name: SSH | Check ssh config file
+  ansible.builtin.stat:
+    path: "/home/{{ item.user }}/.ssh/config"
+  with_items: "{{ setup_user_ssh }}"
+  register: ssh_config_file
+
+- name: SSH | Setup SSH config
+  ansible.builtin.template:
+    src: ssh_config.j2
+    dest: "/home/{{ item.item.user }}/.ssh/config"
+    owner: "{{ item.item.user }}"
+    group: "{{ item.item.group }}"
+    mode: 0600
+  with_items: "{{ ssh_config_file.results }}"
+  when: not item.stat.exists
