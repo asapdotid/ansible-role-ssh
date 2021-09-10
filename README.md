@@ -29,9 +29,11 @@ None
 
 ## Role Variables
 
-| Name             | Default Value | Description                                              |
-| ---------------- | ------------- | -------------------------------------------------------- |
-| `setup_user_ssh` | `[]`          | Setup multiple ssh directory with private key and owner. |
+| Name                   | Default Value | Description                                                   |
+| ---------------------- | ------------- | ------------------------------------------------------------- |
+| `ssh_root_setup`       | `false`       | Setup ssh for root default `false`, can activate with `true`. |
+| `ssh_root_private_key` | `""`          | Setup private key for root with string `base64 encoding`.     |
+| `ssh_setup_users`      | `[]`          | Setup multiple ssh directory with private key and owner.      |
 
 ## Dependencies
 
