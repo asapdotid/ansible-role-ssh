@@ -18,12 +18,12 @@
       with_items: "{{ root_ssh_dir.results }}"
       when: not item.stat.exists
 
-    - name: SSH | Check id_rsa file
+    - name: SSH | Check root ssh id_rsa file
       ansible.builtin.stat:
         path: "/root/.ssh/id_rsa"
       register: root_id_rsa_file
 
-    - name: SSH | Create a id_rsa file
+    - name: SSH | Create root ssh id_rsa file
       ansible.builtin.file:
         path: "/root/.ssh/id_rsa"
         state: touch
@@ -33,7 +33,7 @@
       with_items: "{{ root_id_rsa_file.results }}"
       when: not item.stat.exists
 
-    - name: SSH | Copy private key
+    - name: SSH | Copy root ssh private key
       ansible.builtin.copy:
         content: "{{ ssh_root_private_key | b64decode }}"
         dest: "/root/.ssh/id_rsa"
@@ -44,12 +44,12 @@
       when: item.stat.exists
       notify: restart sshd
 
-    - name: SSH | Check ssh config file
+    - name: SSH | Check root ssh config file
       ansible.builtin.stat:
         path: "/root/.ssh/config"
       register: root_ssh_config_file
 
-    - name: SSH | Setup SSH config
+    - name: SSH | Setup root ssh config
       ansible.builtin.template:
         src: ssh_config.j2
         dest: "/root/.ssh/config"
@@ -59,13 +59,14 @@
       with_items: "{{ root_ssh_config_file.results }}"
       when: not item.stat.exists
 
-  rescue:
-    - name: SSH | Root SSH setup errors
-      ansible.builtin.debug:
-        msg: "I caught an error, can do stuff here to fix it, :-)"
   when:
     - ssh_root_setup == "true"
     - ssh_root_private_key != ''
+
+  rescue:
+    - name: SSH | Setup root SSH errors
+      ansible.builtin.debug:
+        msg: "I caught an error, can do stuff here to fix it, :-)"
 
 - name: SSH | Check users SSH directory exists.
   ansible.builtin.stat:
