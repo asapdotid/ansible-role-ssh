@@ -1,0 +1,62 @@
+- name: SSH | Setup SSH directory and private key files
+  block:
+    - name: SSH | Check {{ item.name }} SSH directory exists.
+      ansible.builtin.stat:
+        path: "{{ item.home_dir | default('/home/') }}{{ item.name }}/.ssh"
+      register: ssh_dir
+
+    - name: SSH | Create ssh directory for user {{ item.name }}.
+      ansible.builtin.file:
+        path: "{{ item.home_dir | default('/home/') }}{{ item.name }}/.ssh"
+        state: directory
+        owner: "{{ item.name }}"
+        group: "root"
+        recurse: yes
+        mode: "0700"
+      when: not ssh_dir.stat.exists
+
+    - name: SSH | Check ssh id_rsa file for user {{ item.name }}.
+      ansible.builtin.stat:
+        path: "{{ item.home_dir | default('/home/') }}{{ item.name }}/.ssh/id_rsa"
+      register: id_rsa_file
+
+    - name: SSH | Create ssh id_rsa file for user {{ item.name }}
+      ansible.builtin.file:
+        path: "{{ item.home_dir | default('/home/') }}{{ item.name }}/.ssh/id_rsa"
+        state: touch
+        owner: "{{ item.name }}"
+        group: "root"
+        mode: "0644"
+      when: not id_rsa_file.stat.exists
+      register: creating_rsa_file
+
+    - name: SSH | Copy ssh private key for user {{ item.name }}
+      ansible.builtin.copy:
+        content: "{{ item.private_key | b64decode }}"
+        dest: "{{ item.home_dir | default('/home/') }}{{ item.name }}/.ssh/id_rsa"
+        owner: "{{ item.name }}"
+        group: "root"
+        mode: "0600"
+      when: creating_rsa_file.changed
+
+    - name: SSH | Check ssh config file for user {{ item.name }}
+      ansible.builtin.stat:
+        path: "{{ item.home_dir | default('/home/') }}{{ item.name }}/.ssh/config"
+      register: ssh_config_file
+
+    - name: SSH | Setup ssh config for user {{ item.name }}
+      ansible.builtin.template:
+        src: ssh_config.j2
+        dest: "{{ item.home_dir | default('/home/') }}{{ item.name }}/.ssh/config"
+        owner: "{{ item.name }}"
+        group: "root"
+        mode: 0600
+      when: not ssh_config_file.stat.exists
+
+  when:
+    - when: item != "{}"
+
+  rescue:
+    - name: SSH | Setup SSH errors
+      ansible.builtin.debug:
+        msg: "I caught an error, can do stuff here to fix it, :-)"

@@ -29,11 +29,10 @@ None
 
 ## Role Variables
 
-| Name                   | Default Value | Description                                                   |
-| ---------------------- | ------------- | ------------------------------------------------------------- |
-| `ssh_root_setup`       | `false`       | Setup ssh for root default `false`, can activate with `true`. |
-| `ssh_root_private_key` | `""`          | Setup private key for root with string `base64 encoding`.     |
-| `ssh_setup_users`      | `[]`          | Setup multiple ssh directory with private key and owner.      |
+| Name                   | Default Value | Description                                               |
+| ---------------------- | ------------- | --------------------------------------------------------- |
+| `ssh_root_private_key` | `""`          | Setup private key for root with string `base64 encoding`. |
+| `ssh_users`            | `[]`          | Setup multiple ssh directory with private key.            |
 
 ## Dependencies
 
@@ -46,12 +45,9 @@ Including an example of how to use your role (for instance, with variables passe
 ```yaml
 - hosts: servers
   vars:
-    setup_user_ssh:
-      - name: "root"
-        group: "root"
-        private_key: "private key with base64 encode"
+    ssh_root_private_key: "private key with base64 encode"
+    ssh_users:
       - name: "vagrant"
-        group: "vagrant"
         private_key: "private key with base64 encode"
 
   roles:
