@@ -1,0 +1,71 @@
+- name: SSH | Setup SSH directory and private key files
+  block:
+    - name: SSH | Check {{ ssh_user.name }} SSH directory exists.
+      ansible.builtin.stat:
+        path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
+      register: ssh_dir
+
+    - name: SSH | Create ssh directory for user {{ ssh_user.name }}.
+      ansible.builtin.file:
+        path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
+        state: directory
+        owner: "{{ ssh_user.name }}"
+        group: "root"
+        recurse: yes
+        mode: "0700"
+      when: not ssh_dir.stat.exists
+
+    - name: SSH | Check ssh id_rsa file for user {{ ssh_user.name }}.
+      ansible.builtin.stat:
+        path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
+      register: id_rsa_file
+
+    - name: SSH | Create ssh id_rsa file for user {{ ssh_user.name }}
+      ansible.builtin.file:
+        path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
+        state: touch
+        owner: "{{ ssh_user.name }}"
+        group: "root"
+        mode: "0644"
+      when: not id_rsa_file.stat.exists
+      register: creating_rsa_file
+
+    - name: SSH | Copy ssh private key for user {{ ssh_user.name }}
+      ansible.builtin.copy:
+        content: "{{ ssh_user.private_key | b64decode }}"
+        dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
+        owner: "{{ ssh_user.name }}"
+        group: "root"
+        mode: "0600"
+      register: ssh_private_key_setup
+      when: creating_rsa_file.changed
+
+    - name: SSH | Check ssh config file for user {{ ssh_user.name }}
+      ansible.builtin.stat:
+        path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
+      register: ssh_config_file
+
+    - name: SSH | Setup ssh config for user {{ ssh_user.name }}
+      ansible.builtin.template:
+        src: ssh_config.j2
+        dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
+        owner: "{{ ssh_user.name }}"
+        group: "root"
+        mode: 0600
+      register: ssh_config_setup
+      when: not ssh_config_file.stat.exists
+
+    - name: SSH | Reload sshd service
+      ansible.builtin.debug:
+        msg: "Reload sshd service"
+      notify: restart sshd
+      when: ssh_config_setup.changed or ssh_private_key_setup.changed
+
+  when:
+    - ssh_user != "{}"
+  become: true
+
+  rescue:
+    - name: SSH | Setup SSH errors
+      ansible.builtin.debug:
+        msg: "I caught an error, can do stuff here to fix it, :-)"

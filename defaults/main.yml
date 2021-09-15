@@ -1,10 +1,13 @@
 ---
 # defaults file for role-ssh
 ## root_private_key with base64 encode
-ssh_root_setup: false
 ssh_root_private_key: ""
-ssh_setup_users:
+ssh_default_user:
   []
-  # - user: ""
-  #   group: ""
+  # - name: root
+  #   home_dir: "/"
+  #   private_key: ""
+ssh_users:
+  []
+  # - name: ""
   #   private_key: ""

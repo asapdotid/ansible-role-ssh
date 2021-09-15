@@ -1,137 +1,22 @@
 ---
 # tasks file for role-ssh
-- name: SSH | Setup SSH directory and private key files for root
-  block:
-    - name: SSH | Check SSH root directory exists.
-      ansible.builtin.stat:
-        path: "/root/.ssh"
-      register: root_ssh_dir
+- name: SSH | Ensure OpenSSH was installed on {{ ansible_facts['distribution'] }}
+  ansible.builtin.package:
+    name: openssh-server
+    state: present
 
-    - name: SSH | Create root ssh directory.
-      ansible.builtin.file:
-        path: "/root/.ssh"
-        state: directory
-        owner: "root"
-        group: "root"
-        recurse: yes
-        mode: "0700"
-      when: not root_ssh_dir.stat.exists
-
-    - name: SSH | Check root ssh id_rsa file
-      ansible.builtin.stat:
-        path: "/root/.ssh/id_rsa"
-      register: root_id_rsa_file
-
-    - name: SSH | Create root ssh id_rsa file
-      ansible.builtin.file:
-        path: "/root/.ssh/id_rsa"
-        state: touch
-        owner: "root"
-        group: "root"
-        mode: "0644"
-      when: not root_id_rsa_file.stat.exists
-      register: creating_root_rsa_file
-
-    - name: SSH | Copy root ssh private key
-      ansible.builtin.copy:
-        content: "{{ ssh_root_private_key | b64decode }}"
-        dest: "/root/.ssh/id_rsa"
-        owner: "root"
-        group: "root"
-        mode: "0600"
-      when: creating_root_rsa_file.changed
-      notify: restart sshd
-
-    - name: SSH | Check root ssh config file
-      ansible.builtin.stat:
-        path: "/root/.ssh/config"
-      register: root_ssh_config_file
-
-    - name: SSH | Setup root ssh config
-      ansible.builtin.template:
-        src: root_ssh_config.j2
-        dest: "/root/.ssh/config"
-        owner: "root"
-        group: "root"
-        mode: 0600
-      when: not root_ssh_config_file.stat.exists
-
+- include_tasks: configure_ssh.yml
+  loop: "{{ ssh_default_user }}"
+  loop_control:
+    loop_var: ssh_user
+  no_log: yes
   when:
-    - ssh_root_setup
-    - ssh_root_private_key != ''
+    - ssh_root_private_key != ""
+    - ssh_default_user != "{}"
 
-  rescue:
-    - name: SSH | Setup root SSH errors
-      ansible.builtin.debug:
-        msg: "I caught an error, can do stuff here to fix it, :-)"
-
-- name: SSH | Setup SSH directory and private key files for users
-  block:
-    - name: SSH | Check users SSH directory exists.
-      ansible.builtin.stat:
-        path: "/home/{{ item.user }}/.ssh"
-      register: ssh_dir
-      with_items: "{{ ssh_setup_users }}"
-
-    - name: SSH | Create ssh directory.
-      ansible.builtin.file:
-        path: "/home/{{ item.item.user }}/.ssh"
-        state: directory
-        owner: "{{ item.item.user }}"
-        group: "{{ item.item.group }}"
-        recurse: yes
-        mode: "0700"
-      with_items: "{{ ssh_dir.results }}"
-      when: not item.stat.exists
-
-    - name: SSH | Check id_rsa file
-      ansible.builtin.stat:
-        path: "/home/{{ item.user }}/.ssh/id_rsa"
-      with_items: "{{ ssh_setup_users }}"
-      register: id_rsa_file
-
-    - name: SSH | Create a id_rsa file
-      ansible.builtin.file:
-        path: "/home/{{ item.item.user }}/.ssh/id_rsa"
-        state: touch
-        owner: "{{ item.item.user }}"
-        group: "{{ item.item.group }}"
-        mode: "0600"
-      with_items: "{{ id_rsa_file.results }}"
-      register: creating_id_rsa_file
-      when: not item.stat.exists
-
-    - name: SSH | Copy private key
-      ansible.builtin.copy:
-        content: "{{ item.item.private_key | b64decode }}"
-        dest: "/home/{{ item.item.user }}/.ssh/id_rsa"
-        owner: "{{ item.item.user }}"
-        group: "{{ item.item.group }}"
-        mode: "0600"
-      with_items: "{{ id_rsa_file.results }}"
-      when: creating_id_rsa_file.changed and (item.item.private_key != '')
-      notify: restart sshd
-
-    - name: SSH | Check ssh config file
-      ansible.builtin.stat:
-        path: "/home/{{ item.user }}/.ssh/config"
-      with_items: "{{ ssh_setup_users }}"
-      register: ssh_config_file
-
-    - name: SSH | Setup SSH config
-      ansible.builtin.template:
-        src: ssh_config.j2
-        dest: "/home/{{ item.item.user }}/.ssh/config"
-        owner: "{{ item.item.user }}"
-        group: "{{ item.item.group }}"
-        mode: 0600
-      with_items: "{{ ssh_config_file.results }}"
-      when: not item.stat.exists
-
-  when:
-    - ssh_setup_users != "{}"
-
-  rescue:
-    - name: SSH | Setup users SSH errors
-      ansible.builtin.debug:
-        msg: "I caught an error, can do stuff here to fix it, :-)"
+- include_tasks: configure_ssh.yml
+  loop: "{{ ssh_users }}"
+  loop_control:
+    loop_var: ssh_user
+  no_log: yes
+  when: ssh_users != "{}"

@@ -1,2 +1,6 @@
 ---
 # vars file for role-ssh
+ssh_default_user:
+  - name: root
+    home_dir: "/"
+    private_key: "{{ ssh_root_private_key }}"

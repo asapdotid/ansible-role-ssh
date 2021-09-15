@@ -1,4 +1,6 @@
+# {{ ansible_managed }}
+
 Host *
     PubkeyAuthentication yes
-    IdentityFile /home/{{ item.item.user }}/.ssh/id_rsa
+    IdentityFile "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
     PasswordAuthentication no
