@@ -1,6 +1,7 @@
 ---
 # defaults file for role-ssh
 ## root_private_key with base64 encode
+ssh_root_private_key: ""
 ssh_default_user:
   []
   # - name: root

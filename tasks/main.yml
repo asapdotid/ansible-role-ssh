@@ -1,23 +1,22 @@
 ---
 # tasks file for role-ssh
-- name: ZSH | Ensure git and zsh was installed on Ubuntu
+- name: SSH | Ensure OpenSSH was installed on {{ ansible_facts['distribution'] }}
   ansible.builtin.package:
-    name: "{{ item }}"
+    name: openssh-server
     state: present
-  with_items:
-    - sshd
 
-- name: SSH | Setup SSH directory and private key files for root
-  include_tasks: configure_ssh.yml
-  with_items: "{{ ssh_default_user }}"
-  notify: restart sshd
+- include_tasks: configure_ssh.yml
+  loop: "{{ ssh_default_user }}"
+  loop_control:
+    loop_var: ssh_user
+  no_log: yes
   when:
+    - ssh_root_private_key != ""
     - ssh_default_user != "{}"
-    - ssh_root_private_key != ''
 
-- name: SSH | Setup SSH directory and private key files for common users
-  include_tasks: configure_ssh.yml
-  with_items: "{{ ssh_users }}"
-  notify: restart sshd
-  when:
-    - ssh_users != "{}"
+- include_tasks: configure_ssh.yml
+  loop: "{{ ssh_users }}"
+  loop_control:
+    loop_var: ssh_user
+  no_log: yes
+  when: ssh_users != "{}"
