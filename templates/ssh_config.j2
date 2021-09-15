@@ -1,4 +1,4 @@
 Host *
     PubkeyAuthentication yes
-    IdentityFile "{{ item.home_dir | default('/home/') }}{{ item.name }}/.ssh/id_rsa"
+    IdentityFile "{{ zsh_user.home_dir | default('/home/') }}{{ zsh_user.name }}/.ssh/id_rsa"
     PasswordAuthentication no
