@@ -55,6 +55,7 @@
 
   when:
     - when: item != "{}"
+  become: true
 
   rescue:
     - name: SSH | Setup SSH errors
