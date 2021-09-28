@@ -40,6 +40,12 @@
       register: ssh_private_key_setup
       when: creating_rsa_file.changed
 
+    - name: SSH | Set authorized key taken from file for user {{ ssh_user.name }}
+      ansible.posix.authorized_key:
+        user: "{{ ssh_user.name }}"
+        state: present
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
     - name: SSH | Check ssh config file for user {{ ssh_user.name }}
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
