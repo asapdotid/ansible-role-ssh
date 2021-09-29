@@ -3,7 +3,6 @@
 __ssh_root_default_vars:
   - name: root
     home_dir: "/"
-    become: yes
     manage_ssh_key: yes
 
 ssh_setup_user_root:

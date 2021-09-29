@@ -10,9 +10,10 @@
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
         state: directory
+        owner: "{{ ssh_user.name }}"
+        group: "{{ ssh_user.name }}"
         recurse: yes
         mode: "0700"
-      become: "{{ ssh_user.become | default('no') }}"
       when: not ssh_dir.stat.exists
 
     - name: SSH | Create a 4096-bit SSH key for user {{ ssh_user.name }} in ~{{ ssh_user.name }}/.ssh/id_rsa
@@ -22,7 +23,6 @@
         ssh_key_bits: 4096
         ssh_key_file: .ssh/id_rsa
         force: no
-      become: "{{ ssh_user.become | default('no') }}"
 
     - name: SSH | Set authorized key taken from file for user {{ ssh_user.name }}
       ansible.posix.authorized_key:
@@ -32,7 +32,6 @@
       loop: "{{ ssh_user.authorized_keys }}"
       loop_control:
         label: "{{ ssh_user.name }}"
-      become: "{{ ssh_user.become | default('no') }}"
       when:
         - ssh_user.authorized_keys != "{}"
         - ssh_user.manage_ssh_key
@@ -46,8 +45,9 @@
       ansible.builtin.template:
         src: ssh_config.j2
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
+        owner: "{{ ssh_user.name }}"
+        group: "{{ ssh_user.name }}"
         mode: 0600
-      become: "{{ ssh_user.become | default('no') }}"
       register: ssh_config_setup
       when: not ssh_config_file.stat.exists
 
@@ -57,6 +57,7 @@
       notify: restart sshd
       when: ssh_config_setup.changed or ssh_private_key_setup.changed
 
+  become: true
   when:
     - ssh_user != "{}"
     - ssh_user.manage_ssh_key
@@ -77,9 +78,10 @@
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
         state: directory
+        owner: "{{ ssh_user.name }}"
+        group: "{{ ssh_user.name }}"
         recurse: yes
         mode: "0700"
-      become: "{{ ssh_user.become | default('no') }}"
       when: not ssh_dir.stat.exists
 
     - name: SSH | Check ssh id_rsa file for user {{ ssh_user.name }}.
@@ -91,8 +93,9 @@
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
         state: touch
+        owner: "{{ ssh_user.name }}"
+        group: "{{ ssh_user.name }}"
         mode: "0644"
-      become: "{{ ssh_user.become | default('no') }}"
       when: not id_rsa_file.stat.exists
       register: creating_rsa_file
 
@@ -100,8 +103,9 @@
       ansible.builtin.copy:
         content: "{{ ssh_user.private_key }}"
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
+        owner: "{{ ssh_user.name }}"
+        group: "{{ ssh_user.name }}"
         mode: "0600"
-      become: "{{ ssh_user.become | default('no') }}"
       register: ssh_private_key_setup
       when: creating_rsa_file.changed
 
@@ -113,7 +117,6 @@
       loop: "{{ ssh_user.authorized_keys }}"
       loop_control:
         label: "{{ ssh_user.name }}"
-      become: "{{ ssh_user.become | default('no') }}"
       when:
         - ssh_user.authorized_keys != "{}"
 
@@ -126,8 +129,9 @@
       ansible.builtin.template:
         src: ssh_config.j2
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
+        owner: "{{ ssh_user.name }}"
+        group: "{{ ssh_user.name }}"
         mode: 0600
-      become: "{{ ssh_user.become | default('no') }}"
       register: ssh_config_setup
       when: not ssh_config_file.stat.exists
 
@@ -137,6 +141,7 @@
       notify: restart sshd
       when: ssh_config_setup.changed or ssh_private_key_setup.changed
 
+  become: true
   when:
     - ssh_user != "{}"
     - not ssh_user.manage_ssh_key
