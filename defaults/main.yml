@@ -1,13 +1,22 @@
 ---
 # defaults file for role-ssh
-## root_private_key with base64 encode
-ssh_root_private_key: ""
-ssh_default_user:
+ssh_user_root:
   []
   # - name: root
   #   home_dir: "/"
+  #   manage_ssh_key: yes
   #   private_key: ""
-ssh_users:
+  #   authorized_keys:
+  #     - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+  #       state: present
+
+ssh_user_users:
   []
   # - name: ""
+  #   manage_ssh_key: yes
   #   private_key: ""
+  #   authorized_keys:
+  #     - key: "ssh-rsa ABC123"
+  #       state: present
+  #     - key: "ssh-rsa ABC123456"
+  #       state: present
