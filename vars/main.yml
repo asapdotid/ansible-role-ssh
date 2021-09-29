@@ -1,6 +1,12 @@
 ---
 # vars file for role-ssh
-ssh_default_user:
+__ssh_root_default_vars:
   - name: root
     home_dir: "/"
-    private_key: "{{ ssh_root_private_key }}"
+    become: yes
+    manage_ssh_key: yes
+
+ssh_setup_user_root:
+  [
+    "{{ __ssh_root_default_vars | combine(ssh_user_root, list_merge='append_rp') }}",
+  ]

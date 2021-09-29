@@ -6,17 +6,15 @@
     state: present
 
 - include_tasks: configure_ssh.yml
-  loop: "{{ ssh_default_user }}"
+  loop: "{{ ssh_setup_user_root }}"
   loop_control:
     loop_var: ssh_user
   no_log: yes
   when:
-    - ssh_root_private_key != ""
-    - ssh_default_user != "{}"
+    - ssh_setup_user_root != "{}"
 
 - include_tasks: configure_ssh.yml
-  loop: "{{ ssh_users }}"
+  loop: "{{ ssh_user_users }}"
   loop_control:
     loop_var: ssh_user
-  no_log: yes
-  when: ssh_users != "{}"
+  when: ssh_user_users != "{}"
