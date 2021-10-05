@@ -29,10 +29,18 @@ None
 
 ## Role Variables
 
-| Name             | Default Value | Description                              |
-| ---------------- | ------------- | ---------------------------------------- |
-| `ssh_user_root`  | `[]`          | Setup SSH for root.                      |
-| `ssh_user_users` | `[]`          | Setup multiple ssh directory with users. |
+| Name                          | Default Value | Description                                         |
+| ----------------------------- | ------------- | --------------------------------------------------- |
+| `ssh_user_ssh_portroot`       | `"22"`        | Secure SSH connection port.                         |
+| `ssh_password_authentication` | `"no"`        | Secure SSH connection password authentication.      |
+| `ssh_permit_root_login`       | `"no"`        | Secure SSH connection root permissions.             |
+| `ssh_usedns`                  | `"no"`        | Secure SSH connection use dns.                      |
+| `ssh_permit_empty_password`   | `"no"`        | Secure SSH connection with empety password.         |
+| `ssh_challenge_response_auth` | `"no"`        | Secure SSH connection challege response auth.       |
+| `ssh_gss_api_authentication`  | `"no"`        | Secure SSH connection using GSSAPI to authenticate. |
+| `ssh_x11_forwarding`          | `"no"`        | Secure SSH connection X11 forwarding working.       |
+| `ssh_user_root`               | `[]`          | Setup SSH for root.                                 |
+| `ssh_user_users`              | `[]`          | Setup multiple ssh directory with users.            |
 
 ## Dependencies
 
@@ -47,6 +55,7 @@ Including an example of how to use your role (for instance, with variables passe
 ```yaml
 - hosts: servers
   vars:
+    ssh_permit_root_login: yes
     ssh_user_root:
       - manage_ssh_key: yes
         authorized_keys:
