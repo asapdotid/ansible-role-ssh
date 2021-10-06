@@ -1,6 +1,6 @@
 ---
 # tasks file for role-ssh
-- name: Include OS-specific variables.
+- name: SSH | Include OS family of {{ ansible_os_family }} variables.
   ansible.builtin.include_vars:
     file: "{{ item }}.yml"
   loop:

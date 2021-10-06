@@ -6,7 +6,7 @@
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
       register: ssh_dir
 
-    - name: SSH | Create ssh directory for user {{ ssh_user.name }}.
+    - name: SSH | Create SSH directory for user {{ ssh_user.name }}.
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
         state: directory
@@ -36,26 +36,26 @@
         - ssh_user.authorized_keys != "{}"
         - ssh_user.manage_ssh_key
 
-    - name: SSH | Check ssh config file for user {{ ssh_user.name }}
+    - name: SSH | Check SSH config file for user {{ ssh_user.name }}
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
-      register: ssh_config_file
+      register: ssh_user_config_file
 
-    - name: SSH | Setup ssh config for user {{ ssh_user.name }}
+    - name: SSH | Setup SSH config for user {{ ssh_user.name }}
       ansible.builtin.template:
-        src: ssh_config.j2
+        src: ssh_user_config.j2
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
         owner: "{{ ssh_user.name }}"
         group: "{{ ssh_user.name }}"
         mode: 0600
-      register: ssh_config_setup
-      when: not ssh_config_file.stat.exists
+      register: ssh_user_config_setup
+      when: not ssh_user_config_file.stat.exists
 
-    - name: SSH | Reload sshd service
+    - name: SSH | Reload SSH service
       ansible.builtin.debug:
-        msg: "Reload sshd service"
-      notify: restart sshd
-      when: ssh_config_setup.changed or ssh_private_key_setup.changed
+        msg: "Reload ssh service"
+      notify: restart ssh
+      when: ssh_user_config_setup.changed or ssh_private_key_setup.changed
 
   become: true
   when:
@@ -74,7 +74,7 @@
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
       register: ssh_dir
 
-    - name: SSH | Create ssh directory for user {{ ssh_user.name }}.
+    - name: SSH | Create SSH directory for user {{ ssh_user.name }}.
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
         state: directory
@@ -84,12 +84,12 @@
         mode: "0700"
       when: not ssh_dir.stat.exists
 
-    - name: SSH | Check ssh id_rsa file for user {{ ssh_user.name }}.
+    - name: SSH | Check SSH id_rsa file for user {{ ssh_user.name }}.
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
       register: id_rsa_file
 
-    - name: SSH | Create ssh id_rsa file for user {{ ssh_user.name }}
+    - name: SSH | Create SSH id_rsa file for user {{ ssh_user.name }}
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
         state: touch
@@ -99,7 +99,7 @@
       when: not id_rsa_file.stat.exists
       register: creating_rsa_file
 
-    - name: SSH | Copy ssh private key for user {{ ssh_user.name }}
+    - name: SSH | Copy SSH private key for user {{ ssh_user.name }}
       ansible.builtin.copy:
         content: "{{ ssh_user.private_key }}"
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
@@ -120,26 +120,26 @@
       when:
         - ssh_user.authorized_keys != "{}"
 
-    - name: SSH | Check ssh config file for user {{ ssh_user.name }}
+    - name: SSH | Check SSH config file for user {{ ssh_user.name }}
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
-      register: ssh_config_file
+      register: ssh_user_config_file
 
-    - name: SSH | Setup ssh config for user {{ ssh_user.name }}
+    - name: SSH | Setup SSH config for user {{ ssh_user.name }}
       ansible.builtin.template:
-        src: ssh_config.j2
+        src: ssh_user_config.j2
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
         owner: "{{ ssh_user.name }}"
         group: "{{ ssh_user.name }}"
         mode: 0600
-      register: ssh_config_setup
-      when: not ssh_config_file.stat.exists
+      register: ssh_user_config_setup
+      when: not ssh_user_config_file.stat.exists
 
-    - name: SSH | Reload sshd service
+    - name: SSH | Reload SSH service
       ansible.builtin.debug:
-        msg: "Reload sshd service"
-      notify: restart sshd
-      when: ssh_config_setup.changed or ssh_private_key_setup.changed
+        msg: "Reload ssh service"
+      notify: restart ssh
+      when: ssh_user_config_setup.changed or ssh_private_key_setup.changed
 
   become: true
   when:
