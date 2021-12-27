@@ -80,15 +80,17 @@ Including an example of how to use your role (for instance, with variables passe
     ssh_user_root:
       - manage_ssh_key: no
         private_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa') }}"
+        public_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
         authorized_keys:
-          - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+          - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/vps_rsa.pub') }}"
             state: present
     ssh_user_users:
       - name: vagrant
         manage_ssh_key: no
         private_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa') }}"
+        public_key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
         authorized_keys:
-          - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+          - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/vps_rsa.pub') }}"
             state: present
 
   roles:
