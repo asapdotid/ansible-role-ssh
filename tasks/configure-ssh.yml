@@ -87,7 +87,7 @@
     - name: SSH | Check SSH id_rsa file for user {{ ssh_user.name }}.
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
-      register: id_rsa_file
+      register: private_key_file
 
     - name: SSH | Create SSH id_rsa file for user {{ ssh_user.name }}
       ansible.builtin.file:
@@ -96,8 +96,8 @@
         owner: "{{ ssh_user.name }}"
         group: "{{ ssh_user.name }}"
         mode: "0644"
-      when: not id_rsa_file.stat.exists
-      register: creating_rsa_file
+      when: not private_key_file.stat.exists
+      register: creating_private_key_file
 
     - name: SSH | Copy SSH private key for user {{ ssh_user.name }}
       ansible.builtin.copy:
@@ -107,7 +107,32 @@
         group: "{{ ssh_user.name }}"
         mode: "0600"
       register: ssh_private_key_setup
-      when: creating_rsa_file.changed
+      when: creating_private_key_file.changed
+
+    - name: SSH | Check SSH id_rsa.pub file for user {{ ssh_user.name }}.
+      ansible.builtin.stat:
+        path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa.pub"
+      register: public_key_file
+
+    - name: SSH | Create SSH id_rsa.pub file for user {{ ssh_user.name }}
+      ansible.builtin.file:
+        path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa.pub"
+        state: touch
+        owner: "{{ ssh_user.name }}"
+        group: "{{ ssh_user.name }}"
+        mode: "0644"
+      when: not public_key_file.stat.exists
+      register: creating_public_key_file
+
+    - name: SSH | Copy SSH public key for user {{ ssh_user.name }}
+      ansible.builtin.copy:
+        content: "{{ ssh_user.public_key }}"
+        dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa.pub"
+        owner: "{{ ssh_user.name }}"
+        group: "{{ ssh_user.name }}"
+        mode: "0600"
+      register: ssh_public_key_setup
+      when: creating_public_key_file.changed
 
     - name: SSH | Set authorized key taken from file for user {{ ssh_user.name }}
       ansible.posix.authorized_key:
@@ -139,7 +164,7 @@
       ansible.builtin.debug:
         msg: "Reload ssh service"
       notify: restart ssh
-      when: ssh_user_config_setup.changed or ssh_private_key_setup.changed
+      when: ssh_user_config_setup.changed or ssh_private_key_setup.changed or ssh_public_key_setup.changed
 
   become: true
   when:
