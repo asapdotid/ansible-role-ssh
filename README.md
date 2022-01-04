@@ -55,7 +55,7 @@ Including an example of how to use your role (for instance, with variables passe
 ```yaml
 - hosts: servers
   vars:
-    ssh_permit_root_login: yes
+    ssh_permit_root_login: "yes"
     ssh_user_root:
       - manage_ssh_key: yes
         authorized_keys:
