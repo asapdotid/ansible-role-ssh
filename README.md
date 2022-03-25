@@ -31,7 +31,7 @@ None
 
 | Name                          | Default Value | Description                                         |
 | ----------------------------- | ------------- | --------------------------------------------------- |
-| `ssh_user_ssh_portroot`       | `"22"`        | Secure SSH connection port.                         |
+| `ssh_port`                    | `"22"`        | Secure SSH connection port.                         |
 | `ssh_password_authentication` | `"no"`        | Secure SSH connection password authentication.      |
 | `ssh_permit_root_login`       | `"no"`        | Secure SSH connection root permissions.             |
 | `ssh_usedns`                  | `"no"`        | Secure SSH connection use dns.                      |
@@ -55,6 +55,7 @@ Including an example of how to use your role (for instance, with variables passe
 ```yaml
 - hosts: servers
   vars:
+    ssh_port: 2222 # custom ssh port
     ssh_permit_root_login: "yes":
     ssh_user_root:
       - manage_ssh_key: yes
