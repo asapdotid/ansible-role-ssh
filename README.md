@@ -93,6 +93,9 @@ Including an example of how to use your role (for instance, with variables passe
         authorized_keys:
           - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/vps_rsa.pub') }}"
             state: present
+            # get public keys form github account
+          - key: "{{ lookup('url', 'https://github.com/your_github_username.keys', split_lines=False) }}"
+            state: present
 
   roles:
     - { role: asapdotid.ssh }
