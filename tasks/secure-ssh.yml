@@ -23,4 +23,5 @@
       line: "GSSAPIAuthentication {{ ssh_gss_api_authentication }}"
     - regexp: "^X11Forwarding"
       line: "X11Forwarding {{ ssh_x11_forwarding }}"
+  become: true
   notify: restart ssh

@@ -17,9 +17,11 @@
     name: "{{ ssh_service_name }}"
     state: started
 
-- include_tasks: secure-ssh.yml
+- name: SSH | Setup secure ssh config
+  ansible.builtin.include_tasks: secure-ssh.yml
 
-- include_tasks: configure-ssh.yml
+- name: SSH | Configure ssh for root
+  ansible.builtin.include_tasks: configure-ssh.yml
   loop: "{{ ssh_setup_user_root }}"
   loop_control:
     loop_var: ssh_user
@@ -27,7 +29,8 @@
   when:
     - ssh_setup_user_root != "{}"
 
-- include_tasks: configure-ssh.yml
+- name: SSH | Configure ssh for user
+  ansible.builtin.include_tasks: configure-ssh.yml
   loop: "{{ ssh_user_users }}"
   loop_control:
     loop_var: ssh_user
