@@ -1,12 +1,17 @@
 ---
-- name: SSH | Automatic setup SSH for user
+- name: Automatic setup SSH for user
+  become: true
+  when:
+    - ssh_user is defined
+    - ssh_user | length > 0
+    - ssh_user.manage_ssh_key
   block:
-    - name: SSH | Check {{ ssh_user.name }} SSH directory exists.
+    - name: Check user ssh directory exists.
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
       register: ssh_dir
 
-    - name: SSH | Create SSH directory for user {{ ssh_user.name }}.
+    - name: Create SSH directory for user {{ ssh_user.name }}.
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
         state: directory
@@ -16,7 +21,7 @@
         mode: "0700"
       when: not ssh_dir.stat.exists
 
-    - name: SSH | Create a 4096-bit SSH key for user {{ ssh_user.name }} in ~{{ ssh_user.name }}/.ssh/id_rsa
+    - name: Create a 4096-bit ssh key for user {{ ssh_user.name }}
       ansible.builtin.user:
         name: "{{ ssh_user.name }}"
         generate_ssh_key: yes
@@ -26,7 +31,7 @@
       failed_when: false
       no_log: true
 
-    - name: SSH | Set authorized key taken from file for user {{ ssh_user.name }}
+    - name: Set authorized key taken from file for user {{ ssh_user.name }}
       ansible.posix.authorized_key:
         user: "{{ ssh_user.name }}"
         state: "{{ item.state }}"
@@ -37,15 +42,16 @@
       failed_when: false
       no_log: true
       when:
-        - ssh_user.authorized_keys != "{}"
+        - ssh_user.authorized_keys is defined
+        - ssh_user.authorized_keys | length > 0
         - ssh_user.manage_ssh_key
 
-    - name: SSH | Check SSH config file for user {{ ssh_user.name }}
+    - name: Check ssh config file for user {{ ssh_user.name }}
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
       register: ssh_user_config_file
 
-    - name: SSH | Setup SSH config for user {{ ssh_user.name }}
+    - name: Setup ssh config for user {{ ssh_user.name }}
       ansible.builtin.template:
         src: ssh_user_config.j2
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
@@ -55,30 +61,30 @@
       register: ssh_user_config_setup
       when: not ssh_user_config_file.stat.exists
 
-    - name: SSH | Reload SSH service
+    - name: Reload ssh service
       ansible.builtin.debug:
         msg: "Reload ssh service"
-      notify: restart ssh
+      notify: (Handler) Restart SSH
       when: ssh_user_config_setup.changed or ssh_private_key_setup.changed
 
-  become: true
-  when:
-    - ssh_user != "{}"
-    - ssh_user.manage_ssh_key
-
   rescue:
-    - name: SSH | Automatic setup SSH errors
+    - name: Automatic setup ssh errors
       ansible.builtin.debug:
         msg: "I caught an error, can do stuff here to fix it, :-)"
 
-- name: SSH | Manual setup SSH
+- name: Manual setup ssh
+  become: true
+  when:
+    - ssh_user is defined
+    - ssh_user | length > 0
+    - not ssh_user.manage_ssh_key
   block:
-    - name: SSH | Check {{ ssh_user.name }} SSH directory exists.
+    - name: Check user ssh directory exists
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
       register: ssh_dir
 
-    - name: SSH | Create SSH directory for user {{ ssh_user.name }}.
+    - name: Create ssh directory for user {{ ssh_user.name }}.
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh"
         state: directory
@@ -88,12 +94,12 @@
         mode: "0700"
       when: not ssh_dir.stat.exists
 
-    - name: SSH | Check SSH id_rsa file for user {{ ssh_user.name }}.
+    - name: Check ssh id_rsa file for user {{ ssh_user.name }}.
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
       register: private_key_file
 
-    - name: SSH | Create SSH id_rsa file for user {{ ssh_user.name }}
+    - name: Create ssh id_rsa file for user {{ ssh_user.name }}
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
         state: touch
@@ -103,7 +109,7 @@
       when: not private_key_file.stat.exists
       register: creating_private_key_file
 
-    - name: SSH | Copy SSH private key for user {{ ssh_user.name }}
+    - name: Copy ssh private key for user {{ ssh_user.name }}
       ansible.builtin.copy:
         content: "{{ ssh_user.private_key }}"
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
@@ -112,16 +118,15 @@
         mode: "0600"
       failed_when: false
       no_log: true
-
       register: ssh_private_key_setup
-      when: creating_private_key_file.changed
+      when: creating_private_key_file.changed # noqa: no-handler
 
-    - name: SSH | Check SSH id_rsa.pub file for user {{ ssh_user.name }}.
+    - name: Check ssh id_rsa.pub file for user {{ ssh_user.name }}.
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa.pub"
       register: public_key_file
 
-    - name: SSH | Create SSH id_rsa.pub file for user {{ ssh_user.name }}
+    - name: Create ssh id_rsa.pub file for user {{ ssh_user.name }}
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa.pub"
         state: touch
@@ -131,7 +136,7 @@
       when: not public_key_file.stat.exists
       register: creating_public_key_file
 
-    - name: SSH | Copy SSH public key for user {{ ssh_user.name }}
+    - name: Copy ssh public key for user {{ ssh_user.name }}
       ansible.builtin.copy:
         content: "{{ ssh_user.public_key }}"
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa.pub"
@@ -141,9 +146,9 @@
       failed_when: false
       no_log: true
       register: ssh_public_key_setup
-      when: creating_public_key_file.changed
+      when: creating_public_key_file.changed # noqa: no-handler
 
-    - name: SSH | Set authorized key taken from file for user {{ ssh_user.name }}
+    - name: Set authorized key taken from file for user {{ ssh_user.name }}
       ansible.posix.authorized_key:
         user: "{{ ssh_user.name }}"
         state: "{{ item.state }}"
@@ -154,14 +159,15 @@
       failed_when: false
       no_log: true
       when:
-        - ssh_user.authorized_keys != "{}"
+        - ssh_user.authorized_keys is defined
+        - ssh_user.authorized_keys | length > 0
 
-    - name: SSH | Check SSH config file for user {{ ssh_user.name }}
+    - name: Check ssh config file for user {{ ssh_user.name }}
       ansible.builtin.stat:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
       register: ssh_user_config_file
 
-    - name: SSH | Setup SSH config for user {{ ssh_user.name }}
+    - name: Setup ssh config for user {{ ssh_user.name }}
       ansible.builtin.template:
         src: ssh_user_config.j2
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
@@ -171,18 +177,13 @@
       register: ssh_user_config_setup
       when: not ssh_user_config_file.stat.exists
 
-    - name: SSH | Reload SSH service
+    - name: Reload ssh service
       ansible.builtin.debug:
         msg: "Reload ssh service"
-      notify: restart ssh
+      notify: (Handler) Restart SSH
       when: ssh_user_config_setup.changed or ssh_private_key_setup.changed or ssh_public_key_setup.changed
 
-  become: true
-  when:
-    - ssh_user != "{}"
-    - not ssh_user.manage_ssh_key
-
   rescue:
-    - name: SSH | Manual setup SSH errors
+    - name: Manual setup ssh errors
       ansible.builtin.debug:
         msg: "I caught an error, can do stuff here to fix it, :-)"

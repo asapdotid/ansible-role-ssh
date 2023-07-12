@@ -24,4 +24,4 @@
     - regexp: "^X11Forwarding"
       line: "X11Forwarding {{ ssh_x11_forwarding }}"
   become: true
-  notify: restart ssh
+  notify: (Handler) Restart SSH

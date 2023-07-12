@@ -1,6 +1,6 @@
 ---
 # handlers file for role-ssh
-- name: restart ssh
+- name: (Handler) Restart SSH
   ansible.builtin.service:
     name: "{{ ssh_service_name }}"
     state: "{{ ssh_restart_handler_state }}"

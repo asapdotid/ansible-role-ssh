@@ -1,38 +1,41 @@
 ---
 # tasks file for role-ssh
-- name: SSH | Include OS family of {{ ansible_os_family }} variables.
+- name: Include variables of {{ ansible_os_family | capitalize }}
   ansible.builtin.include_vars:
     file: "{{ item }}.yml"
   loop:
     - "{{ ansible_os_family | lower }}"
     - main
 
-- name: SSH | Ensure OpenSSH was installed on {{ ansible_facts['distribution'] }}
+- name: Ensure OpenSSH was installed on {{ ansible_facts['distribution'] }}
   ansible.builtin.package:
     name: "{{ ssh_package_name }}"
     state: present
 
-- name: SSH | Ensure SSH daemon is running.
-  service:
+- name: Ensure SSH daemon is running
+  ansible.builtin.service:
     name: "{{ ssh_service_name }}"
     state: started
 
-- name: SSH | Setup secure ssh config
+- name: Setup secure SSH config
   ansible.builtin.include_tasks: secure-ssh.yml
 
-- name: SSH | Configure ssh for root
+- name: Configure SSH for root
   ansible.builtin.include_tasks: configure-ssh.yml
   loop: "{{ ssh_setup_user_root }}"
   loop_control:
     loop_var: ssh_user
   no_log: yes
   when:
-    - ssh_setup_user_root != "{}"
+    - ssh_setup_user_root is defined
+    - ssh_setup_user_root | length > 0
 
-- name: SSH | Configure ssh for user
+- name: Configure SSH for user
   ansible.builtin.include_tasks: configure-ssh.yml
   loop: "{{ ssh_user_users }}"
   loop_control:
     loop_var: ssh_user
   no_log: yes
-  when: ssh_user_users != "{}"
+  when:
+    - ssh_user_users is defined
+    - ssh_user_users | length > 0
