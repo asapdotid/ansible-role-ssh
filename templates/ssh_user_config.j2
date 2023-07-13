@@ -1,6 +1,25 @@
 # {{ ansible_managed }}
 
 Host *
-    PubkeyAuthentication yes
-    IdentityFile "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_rsa"
-    PasswordAuthentication no
+    ForwardAgent yes
+    ForwardX11 no
+    ForwardX11Trusted yes
+    ExitOnForwardFailure yes
+    Port 22
+    Protocol 2
+    ServerAliveInterval 240
+    ServerAliveCountMax 6
+    Compression yes
+    StrictHostKeyChecking no
+    UserKnownHostsFile=/dev/null
+    LogLevel ERROR
+
+{% if (ssh_user.ssh_config_hosts is defined) and (ssh_user.ssh_config_hosts | length > 0) %}
+{% for item in ssh_user.ssh_config_hosts %}
+Host {{ item.name }}
+  HostName {{ item.host }}
+  User {{ item.user }}
+  IdentityFile "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_{{ ssh_user.ssh_key_type }}"
+
+{% endfor %}
+{% endif %}
