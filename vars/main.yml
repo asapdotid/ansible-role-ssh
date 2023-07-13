@@ -1,11 +1,15 @@
 ---
 # vars file for role-ssh
+ssh_key_types:
+  - rsa
+  - dsa
+  - ecdsa
+  - ed25519
+
 __ssh_root_default_vars:
   - name: root
     home_dir: "/"
+    ssh_key_type: rsa
     manage_ssh_key: yes
 
-ssh_setup_user_root:
-  [
-    "{{ __ssh_root_default_vars | combine(ssh_user_root, list_merge='append_rp') }}",
-  ]
+ssh_setup_user_root: ["{{ __ssh_root_default_vars | combine(ssh_user_root, list_merge='append_rp') }}"]
