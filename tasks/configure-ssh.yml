@@ -108,39 +108,27 @@
         mode: '0700'
       when: not ssh_dir.stat.exists
 
-    - name: Check ssh private key file on user {{ ssh_user.name }}
-      ansible.builtin.stat:
-        path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_{{ ssh_user.ssh_key_type }}"
-      register: private_key_file
-
     - name: Create ssh private key file for user {{ ssh_user.name }}
       ansible.builtin.file:
         path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_{{ ssh_user.ssh_key_type }}"
         state: touch
         owner: "{{ ssh_user.name }}"
         group: "{{ ssh_user.name }}"
-        mode: '0644'
+        mode: '0600'
       register: creating_private_key_file
-      when:
-        - not private_key_file.stat.exists
 
     - name: Copy ssh private key for user {{ ssh_user.name }}
       ansible.builtin.copy:
-        content: "{{ ssh_user.private_key }}"
+        content: "{{ ssh_user.private_key + '\n' }}"
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_{{ ssh_user.ssh_key_type }}"
         owner: "{{ ssh_user.name }}"
         group: "{{ ssh_user.name }}"
         mode: '0600'
-      failed_when: false
       no_log: true
+      failed_when: false
       register: ssh_private_key_setup
       when:
         - creating_private_key_file.changed # noqa: no-handler
-
-    - name: Check ssh public key file on user {{ ssh_user.name }}.
-      ansible.builtin.stat:
-        path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_{{ ssh_user.ssh_key_type }}.pub"
-      register: public_key_file
 
     - name: Create ssh public key file for user {{ ssh_user.name }}
       ansible.builtin.file:
@@ -148,20 +136,18 @@
         state: touch
         owner: "{{ ssh_user.name }}"
         group: "{{ ssh_user.name }}"
-        mode: '0644'
+        mode: '0600'
       register: creating_public_key_file
-      when:
-        - not public_key_file.stat.exists
 
     - name: Copy ssh public key for user {{ ssh_user.name }}
       ansible.builtin.copy:
-        content: "{{ ssh_user.public_key }}"
+        content: "{{ ssh_user.public_key + '\n' }}"
         dest: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/id_{{ ssh_user.ssh_key_type }}.pub"
         owner: "{{ ssh_user.name }}"
         group: "{{ ssh_user.name }}"
         mode: '0600'
-      failed_when: false
       no_log: true
+      failed_when: false
       register: ssh_public_key_setup
       when: creating_public_key_file.changed # noqa: no-handler
 
@@ -179,11 +165,6 @@
         - ssh_user.authorized_keys is defined
         - ssh_user.authorized_keys | length > 0
 
-    - name: Check ssh config file for user {{ ssh_user.name }}
-      ansible.builtin.stat:
-        path: "{{ ssh_user.home_dir | default('/home/') }}{{ ssh_user.name }}/.ssh/config"
-      register: ssh_user_config_file
-
     - name: Setup ssh config for user {{ ssh_user.name }}
       ansible.builtin.template:
         src: ssh_user_config.j2
@@ -191,8 +172,9 @@
         owner: "{{ ssh_user.name }}"
         group: "{{ ssh_user.name }}"
         mode: '0600'
+      no_log: true
+      failed_when: false
       register: ssh_user_config_setup
-      when: not ssh_user_config_file.stat.exists
 
     - name: Reload ssh service
       ansible.builtin.debug:
