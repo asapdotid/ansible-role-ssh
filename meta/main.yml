@@ -4,38 +4,28 @@ galaxy_info:
   company: JogjaScript
   role_name: ssh
   license: "license (BSD, MIT)"
-  min_ansible_version: 2.10
+  min_ansible_version: "2.10"
   platforms:
     - name: EL
       versions:
-        - 6
-        - 7
-        - 8
-    - name: Ubuntu
-      versions:
-        - xenial
-        - bionic
-        - focal
-        - jammy
-    - name: Archlinux
+        - all
+    - name: Debian
       versions:
         - all
-    - name: FreeBSD
+    - name: Ubuntu
       versions:
-        - 10.3
-        - 10.2
-        - 10.1
-        - 10.0
-        - 9.3
-    - name: OpenBSD
-      versions:
-        - 5.9
-        - 6.0
+        - all
   galaxy_tags:
     - server
     - ssh
     - ubuntu
     - linux
     - debian
+    - centos
+    - redhat
 
 dependencies: []
+
+collections:
+  - ansible.posix
+  - ansible.crypto
