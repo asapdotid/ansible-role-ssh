@@ -68,6 +68,13 @@ Including an example of how to use your role (for instance, with variables passe
         authorized_keys: # not mandatory
           - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
             state: present
+        ssh_config_hosts:
+          - name: github.com
+            host: github.com
+            user: git
+          - name: gitlab.com
+            host: gitlab.com
+            user: git
     ssh_user_users:
       - name: vagrant
         manage_ssh_key: true
@@ -76,6 +83,13 @@ Including an example of how to use your role (for instance, with variables passe
         authorized_keys: # not mandatory
           - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
             state: present
+        ssh_config_hosts:
+          - name: github.com
+            host: github.com
+            user: git
+          - name: gitlab.com
+            host: gitlab.com
+            user: git
 
   roles:
     - { role: asapdotid.ssh }
@@ -94,6 +108,13 @@ Including an example of how to use your role (for instance, with variables passe
         authorized_keys: # not mandatory
           - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/vps_rsa.pub') }}"
             state: present
+        ssh_config_hosts:
+          - name: github.com
+            host: github.com
+            user: git
+          - name: gitlab.com
+            host: gitlab.com
+            user: git
     ssh_user_users:
       - name: vagrant
         manage_ssh_key: false
@@ -106,6 +127,13 @@ Including an example of how to use your role (for instance, with variables passe
             # get public keys form github account
           - key: "{{ lookup('url', 'https://github.com/your_github_username.keys', split_lines=False) }}"
             state: present
+        ssh_config_hosts:
+          - name: github.com
+            host: github.com
+            user: git
+          - name: gitlab.com
+            host: gitlab.com
+            user: git
 
   roles:
     - { role: asapdotid.ssh }
