@@ -31,6 +31,7 @@ None
 
 | Name                          | Default Value | Description                                         |
 | ----------------------------- | ------------- | --------------------------------------------------- |
+| `ssh_secure_config`           | `false`       | Secure SSH connection config.                       |
 | `ssh_port`                    | `"22"`        | Secure SSH connection port.                         |
 | `ssh_password_authentication` | `"no"`        | Secure SSH connection password authentication.      |
 | `ssh_permit_root_login`       | `"no"`        | Secure SSH connection root permissions.             |
