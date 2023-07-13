@@ -19,8 +19,11 @@ ssh_user_root:
   []
   # - name: root
   #   home_dir: "/"
-  #   manage_ssh_key: yes
+  #   manage_ssh_key: true
+  #   ssh_key_type: rsa
+  #   ssh_key_size: 2048 # only for automatic generate ssh key
   #   private_key: ""
+  #   public_key: ""
   #   authorized_keys:
   #     - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
   #       state: present
@@ -28,8 +31,11 @@ ssh_user_root:
 ssh_user_users:
   []
   # - name: ""
-  #   manage_ssh_key: yes
+  #   manage_ssh_key: true
+  #   ssh_key_type: rsa
+  #   ssh_key_size: 2048 # only for automatic generate ssh key
   #   private_key: ""
+  #   public_key: ""
   #   authorized_keys:
   #     - key: "ssh-rsa ABC123"
   #       state: present
