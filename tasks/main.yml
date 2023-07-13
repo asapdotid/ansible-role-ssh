@@ -19,6 +19,9 @@
 
 - name: Setup secure SSH config
   ansible.builtin.include_tasks: secure-ssh.yml
+  when:
+    - ssh_secure_config is defined
+    - ssh_secure_config | bool
 
 - name: Configure SSH for root
   ansible.builtin.include_tasks: configure-ssh.yml

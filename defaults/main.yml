@@ -5,6 +5,7 @@ ssh_package_name: openssh-server
 ssh_restart_handler_state: restarted
 
 # SSH secure configuration
+ssh_secure_config: false
 ssh_port: 22
 ssh_password_authentication: "no"
 ssh_permit_root_login: "no"
