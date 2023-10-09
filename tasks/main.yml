@@ -28,7 +28,7 @@
   loop: "{{ ssh_setup_user_root }}"
   loop_control:
     loop_var: ssh_user
-  no_log: yes
+  no_log: true
   when:
     - ssh_setup_user_root is defined
     - ssh_setup_user_root | length > 0
@@ -38,7 +38,7 @@
   loop: "{{ ssh_user_users }}"
   loop_control:
     loop_var: ssh_user
-  no_log: yes
+  no_log: true
   when:
     - ssh_user_users is defined
     - ssh_user_users | length > 0
