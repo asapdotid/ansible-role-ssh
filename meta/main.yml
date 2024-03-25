@@ -1,28 +1,36 @@
+---
 galaxy_info:
-  author: asapdotid
-  description: This ansible role setup ssh On Ubuntu, CentOS
-  company: JogjaScript
   role_name: ssh
-  license: "license (BSD, MIT)"
+  author: asapdotid
+  description: Install and configure the SSH on Linux
+  company: none
+
+  license: MIT
+
   min_ansible_version: "2.10"
+
   platforms:
     - name: EL
       versions:
-        - all
-    - name: Debian
-      versions:
-        - all
+        - 7
+        - 8
+        - 9
     - name: Ubuntu
       versions:
-        - all
+        - bionic
+        - focal
+        - jammy
+    - name: Debian
+      versions:
+        - buster
+        - bulleye
+        - bookworm
+
   galaxy_tags:
-    - server
+    - system
     - ssh
-    - ubuntu
+    - sshd
     - linux
-    - debian
-    - centos
-    - redhat
 
 dependencies: []
 
