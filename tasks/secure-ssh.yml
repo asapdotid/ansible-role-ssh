@@ -1,27 +1,88 @@
-- name: SSH | Update SSH configuration to be more secure.
-  ansible.builtin.lineinfile:
-    dest: "{{ ssh_config_path }}"
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-    state: present
-    validate: "sshd -T -f %s"
+---
+- name: SSH | Allow users to use SSH
+  when: ssh_permit_root_login == "no"
+  ansible.builtin.assert:
+    that: "{{ ssh_allow_users | length > 0 }}"
+    fail_msg: "No users defined to allow SSH access"
+
+- name: SSH | Ensure SSH config file exists
+  ansible.builtin.stat:
+    path: "{{ ssh_config_path }}"
+  register: ssh_config_file
+
+- name: SSH | Backup SSH config file
+  ansible.builtin.copy:
+    src: "{{ ssh_config_path }}"
+    dest: "{{ ssh_config_path }}.backup"
+    owner: root
+    group: root
     mode: '0644'
-  with_items:
-    - regexp: "^PasswordAuthentication"
-      line: "PasswordAuthentication {{ ssh_password_authentication }}"
-    - regexp: "^PermitRootLogin"
-      line: "PermitRootLogin {{ ssh_permit_root_login }}"
-    - regexp: "^Port"
-      line: "Port {{ ssh_port }}"
-    - regexp: "^UseDNS"
-      line: "UseDNS {{ ssh_usedns }}"
-    - regexp: "^PermitEmptyPasswords"
-      line: "PermitEmptyPasswords {{ ssh_permit_empty_password }}"
-    - regexp: "^ChallengeResponseAuthentication"
-      line: "ChallengeResponseAuthentication {{ ssh_challenge_response_auth }}"
-    - regexp: "^GSSAPIAuthentication"
-      line: "GSSAPIAuthentication {{ ssh_gss_api_authentication }}"
-    - regexp: "^X11Forwarding"
-      line: "X11Forwarding {{ ssh_x11_forwarding }}"
+  when: ssh_config_file.stat.exists
+
+- name: SSH | Update SSH configuration to be more secure
   become: true
-  notify: (Handler) Restart SSH
+  when: ssh_config_file.stat.exists
+  block:
+    - name: SSH | Update SSH configuration to be more secure.
+      ansible.builtin.lineinfile:
+        dest: "{{ ssh_config_path }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        validate: "sshd -T -f %s"
+        mode: '0644'
+      with_items:
+        - regexp: "^Protocol"
+          line: "Protocol 2"
+        - regexp: "^PasswordAuthentication"
+          line: "PasswordAuthentication {{ ssh_password_authentication }}"
+        - regexp: "^PermitRootLogin"
+          line: "PermitRootLogin {{ ssh_permit_root_login }}"
+        - regexp: "^Port"
+          line: "Port {{ ssh_port }}"
+        - regexp: "^AllowUsers"
+          line: "AllowUsers {{ ssh_allow_users | join(' ') }}"
+        - regexp: "^MaxAuthTries"
+          line: "MaxAuthTries {{ ssh_max_auth_tries }}"
+        - regexp: "^LoginGraceTime"
+          line: "LoginGraceTime {{ ssh_login_grace_time }}"
+        - regexp: "^UseDNS"
+          line: "UseDNS {{ ssh_usedns }}"
+        - regexp: "^PermitEmptyPasswords"
+          line: "PermitEmptyPasswords {{ ssh_permit_empty_password }}"
+        - regexp: "^ChallengeResponseAuthentication"
+          line: "ChallengeResponseAuthentication {{ ssh_challenge_response_auth }}"
+        - regexp: "^GSSAPIAuthentication"
+          line: "GSSAPIAuthentication {{ ssh_gss_api_authentication }}"
+        - regexp: "^X11Forwarding"
+          line: "X11Forwarding {{ ssh_x11_forwarding }}"
+        - regexp: "^AllowTcpForwarding"
+          line: "AllowTcpForwarding {{ ssh_allow_tcp_forwarding }}"
+        - regexp: "^AllowAgentForwarding"
+          line: "AllowAgentForwarding {{ ssh_allow_agent_forwarding }}"
+        - regexp: "^PermitUserEnvironment"
+          line: "PermitUserEnvironment {{ ssh_permit_user_env }}"
+        - regexp: "^ClientAliveInterval"
+          line: "ClientAliveInterval {{ ssh_client_alive_interval }}"
+        - regexp: "^ClientAliveCountMax"
+          line: "ClientAliveCountMax {{ ssh_client_alive_count_max }}"
+        - regexp: "^DebianBanner"
+          line: "DebianBanner {{ ssh_banner }}"
+
+    - name: SSH | Update SSH configuration allow users
+      ansible.builtin.lineinfile:
+        dest: "{{ ssh_config_path }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        validate: "sshd -T -f %s"
+        mode: '0644'
+      when: ssh_permit_root_login == "no"
+      with_items:
+        - regexp: "^AllowUsers"
+          line: "AllowUsers {{ ssh_allow_users | join(' ') }}"
+
+    - name: Reload SSH service
+      ansible.builtin.debug:
+        msg: "Reload ssh service"
+      notify: (Handler) Restart SSH
