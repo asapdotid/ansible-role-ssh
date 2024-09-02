@@ -23,9 +23,18 @@
   become: true
   when: ssh_config_file.stat.exists
   block:
+    - name: SSH | Custom banner {{ ssh_custom_banner_text}}
+      ansible.builtin.shell:
+        cmd: figlet "{{ ssh_custom_banner_text }}" >> "{{ ssh_custom_banner_path }}/{{ ssh_custom_banner_file_name }}"
+      args:
+        chdir: "{{ ssh_custom_banner_path }}/"
+        creates: "{{ ssh_custom_banner_file_name }}"
+        executable: /bin/bash
+      when: ssh_custom_banner_enabled | bool
+
     - name: SSH | Update SSH configuration to be more secure.
       ansible.builtin.lineinfile:
-        dest: "{{ ssh_config_path }}"
+        path: "{{ ssh_config_path }}"
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
         state: present
@@ -66,21 +75,25 @@
           line: "ClientAliveInterval {{ ssh_client_alive_interval }}"
         - regexp: "^ClientAliveCountMax"
           line: "ClientAliveCountMax {{ ssh_client_alive_count_max }}"
-        - regexp: "^DebianBanner"
-          line: "DebianBanner {{ ssh_banner }}"
 
-    - name: SSH | Update SSH configuration allow users
+    - name: SSH | Update SSH config allow users
       ansible.builtin.lineinfile:
-        dest: "{{ ssh_config_path }}"
-        regexp: "{{ item.regexp }}"
-        line: "{{ item.line }}"
+        path: "{{ ssh_config_path }}"
+        line: "AllowUsers {{ ssh_allow_users | join(' ') }}"
         state: present
         validate: "sshd -T -f %s"
         mode: '0644'
       when: ssh_permit_root_login == "no"
-      with_items:
-        - regexp: "^AllowUsers"
-          line: "AllowUsers {{ ssh_allow_users | join(' ') }}"
+
+    - name: SSH | Update SSH config banner
+      ansible.builtin.lineinfile:
+        dest: "{{ ssh_config_path }}"
+        regexp: "^Banner"
+        line: "Banner {{ ssh_custom_banner_path }}/{{ ssh_custom_banner_file_name }}"
+        state: present
+        validate: "sshd -T -f %s"
+        mode: '0644'
+      when: ssh_custom_banner_enabled | bool
 
     - name: Reload SSH service
       ansible.builtin.debug:

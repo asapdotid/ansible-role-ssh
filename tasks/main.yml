@@ -6,15 +6,8 @@
     - "{{ ansible_os_family | lower }}"
     - main
 
-- name: Ensure OpenSSH was installed on {{ ansible_facts['distribution'] }}
-  ansible.builtin.package:
-    name: "{{ ssh_package_name }}"
-    state: present
-
-- name: Ensure SSH daemon is running
-  ansible.builtin.service:
-    name: "{{ ssh_service_name }}"
-    state: started
+- name: Ensure SSH and dependencies are installed
+  ansible.builtin.include_tasks: install.yml
 
 - name: Setup secure SSH config
   ansible.builtin.include_tasks: secure-ssh.yml

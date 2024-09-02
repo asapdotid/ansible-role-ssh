@@ -1,0 +1,16 @@
+# tasks file
+---
+- name: Ensure OpenSSH was installed on {{ ansible_facts['distribution'] }}
+  ansible.builtin.package:
+    name: "{{ ssh_package_name }}"
+    state: present
+
+- name: Ensure SSH daemon is running
+  ansible.builtin.service:
+    name: "{{ ssh_service_name }}"
+    state: started
+
+- name: Install dependencies package
+  ansible.builtin.package:
+    name: "{{ ssh_package_dependencies | join(' ') | default('') }}"
+    state: present

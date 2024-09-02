@@ -3,6 +3,12 @@
 # SSH package name
 ssh_package_name: openssh-server
 ssh_restart_handler_state: restarted
+ssh_package_dependencies:
+  - figlet
+ssh_custom_banner_enabled: false
+ssh_custom_banner_path: "/etc/ssh"
+ssh_custom_banner_file_name: "my_banner"
+ssh_custom_banner_text: "asaplabs"
 
 # SSH secure configuration
 ssh_secure_config: false
