@@ -33,24 +33,23 @@ ssh_client_alive_count_max: 2
 ssh_banner: "no"
 
 ssh_user_root:
-  []
-  # - name: root
-  #   home_dir: "/"
-  #   manage_ssh_key: true
-  #   ssh_key_type: rsa
-  #   ssh_key_size: 2048 # only for automatic generate ssh key
-  #   private_key: ""
-  #   public_key: ""
-  #   authorized_keys:
-  #     - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
-  #       state: present
-  #   ssh_config_hosts:
-  #     - name: github.com
-  #       host: github.com
-  #       user: git
-  #     - name: gitlab.com
-  #       host: gitlab.com
-  #       user: git
+  - name: root
+    home_dir: "/"
+    manage_ssh_key: true
+    ssh_key_type: rsa
+    ssh_key_size: 2048
+    private_key: ""
+    public_key: ""
+    authorized_keys:
+      - key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+        state: present
+    # ssh_config_hosts:
+    #   - name: github.com
+    #     host: github.com
+    #     user: git
+    #   - name: gitlab.com
+    #     host: gitlab.com
+    #     user: git
 
 ssh_user_users:
   []
