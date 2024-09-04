@@ -1,7 +1,6 @@
 ---
 - name: Automatic setup SSH for user
   become: true
-  become_method: sudo
   when:
     - ssh_user is defined
     - ssh_user | length > 0
@@ -77,7 +76,6 @@
 
 - name: Manual setup SSH keys
   become: true
-  become_method: sudo
   when:
     - ssh_user is defined
     - ssh_user | length > 0

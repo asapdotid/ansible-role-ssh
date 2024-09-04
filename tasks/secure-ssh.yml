@@ -23,7 +23,7 @@
   become: true
   when: ssh_config_file.stat.exists
   block:
-    - name: SSH | Custom banner {{ ssh_custom_banner_text}}
+    - name: SSH | Custom banner {{ ssh_custom_banner_text }}
       ansible.builtin.shell:
         cmd: figlet "{{ ssh_custom_banner_text }}" >> "{{ ssh_custom_banner_path }}/{{ ssh_custom_banner_file_name }}"
       args:
