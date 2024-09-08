@@ -49,8 +49,6 @@
           line: "PermitRootLogin {{ ssh_permit_root_login }}"
         - regexp: "^Port"
           line: "Port {{ ssh_port }}"
-        - regexp: "^AllowUsers"
-          line: "AllowUsers {{ ssh_allow_users | join(' ') }}"
         - regexp: "^MaxAuthTries"
           line: "MaxAuthTries {{ ssh_max_auth_tries }}"
         - regexp: "^LoginGraceTime"
