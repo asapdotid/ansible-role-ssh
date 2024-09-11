@@ -16,7 +16,7 @@
     dest: "{{ ssh_config_path }}.backup"
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   when: ssh_config_file.stat.exists
 
 - name: SSH | Update SSH configuration to be more secure
@@ -39,7 +39,7 @@
         line: "{{ item.line }}"
         state: present
         validate: "sshd -T -f %s"
-        mode: '0644'
+        mode: "0644"
       with_items:
         - regexp: "^Protocol"
           line: "Protocol 2"
@@ -63,10 +63,12 @@
           line: "GSSAPIAuthentication {{ ssh_gss_api_authentication }}"
         - regexp: "^X11Forwarding"
           line: "X11Forwarding {{ ssh_x11_forwarding }}"
-        - regexp: "^AllowTcpForwarding"
-          line: "AllowTcpForwarding {{ ssh_allow_tcp_forwarding }}"
         - regexp: "^AllowAgentForwarding"
           line: "AllowAgentForwarding {{ ssh_allow_agent_forwarding }}"
+        - regexp: "^AllowTcpForwarding"
+          line: "AllowTcpForwarding {{ ssh_allow_tcp_forwarding }}"
+        - regexp: "^PermitTunnel"
+          line: "PermitTunnel {{ ssh_permit_tunnel }}"
         - regexp: "^PermitUserEnvironment"
           line: "PermitUserEnvironment {{ ssh_permit_user_env }}"
         - regexp: "^ClientAliveInterval"
@@ -80,7 +82,7 @@
         line: "AllowUsers {{ ssh_allow_users | join(' ') }}"
         state: present
         validate: "sshd -T -f %s"
-        mode: '0644'
+        mode: "0644"
       when: ssh_permit_root_login == "no"
 
     - name: SSH | Update SSH config banner
@@ -90,7 +92,7 @@
         line: "Banner {{ ssh_custom_banner_path }}/{{ ssh_custom_banner_file_name }}"
         state: present
         validate: "sshd -T -f %s"
-        mode: '0644'
+        mode: "0644"
       when: ssh_custom_banner_enabled | bool
 
     - name: Reload SSH service

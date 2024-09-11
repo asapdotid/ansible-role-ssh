@@ -25,8 +25,9 @@ ssh_permit_empty_password: "no"
 ssh_challenge_response_auth: "no"
 ssh_gss_api_authentication: "no"
 ssh_x11_forwarding: "no"
-ssh_allow_tcp_forwarding: "no"
 ssh_allow_agent_forwarding: "no"
+ssh_allow_tcp_forwarding: "no"
+ssh_permit_tunnel: "no"
 ssh_permit_user_env: "no"
 ssh_client_alive_interval: 300
 ssh_client_alive_count_max: 3
