@@ -5,32 +5,10 @@ ssh_package_name: openssh-server
 ssh_restart_handler_state: restarted
 ssh_package_dependencies:
   - figlet
-ssh_custom_banner_enabled: false
+ssh_custom_banner: false
 ssh_custom_banner_path: "/etc/ssh"
-ssh_custom_banner_file_name: "my_banner"
-ssh_custom_banner_text: "asaplabs"
-
-# SSH secure configuration
-ssh_secure_config: false
-
-# SSH hardening settings
-ssh_port: 22
-ssh_max_auth_tries: 3
-ssh_login_grace_time: 30
-ssh_password_authentication: "no"
-ssh_permit_root_login: "yes"
-ssh_allow_users: []
-ssh_usedns: "no"
-ssh_permit_empty_password: "no"
-ssh_challenge_response_auth: "no"
-ssh_gss_api_authentication: "no"
-ssh_x11_forwarding: "no"
-ssh_allow_agent_forwarding: "no"
-ssh_allow_tcp_forwarding: "no"
-ssh_permit_tunnel: "no"
-ssh_permit_user_env: "no"
-ssh_client_alive_interval: 300
-ssh_client_alive_count_max: 3
+ssh_custom_banner_file_name: "banner"
+ssh_custom_banner_welcome_text: "asaplab"
 
 ssh_user_root:
   - name: root
@@ -43,31 +21,14 @@ ssh_user_root:
     authorized_keys:
       - key: "{{ lookup('file', lookup('env', 'HOME') + '/.ssh/id_rsa.pub') }}"
         state: present
-    # ssh_config_hosts:
-    #   - name: github.com
-    #     host: github.com
-    #     user: git
-    #   - name: gitlab.com
-    #     host: gitlab.com
-    #     user: git
 
+# SSH users setup
 ssh_user_users:
   []
-  # - name: ""
-  #   manage_ssh_key: true
-  #   ssh_key_type: rsa
-  #   ssh_key_size: 2048 # only for automatic generate ssh key
-  #   private_key: ""
-  #   public_key: ""
-  #   authorized_keys:
-  #     - key: "ssh-rsa ABC123"
-  #       state: present
-  #     - key: "ssh-rsa ABC123456"
-  #       state: present
-  #   ssh_config_hosts:
-  #     - name: github.com
-  #       host: github.com
-  #       user: git
-  #     - name: gitlab.com
-  #       host: gitlab.com
-  #       user: git
+
+# SSH secure configuration
+ssh_secure_config: false
+
+# SSH secure config custom if true
+ssh_secure_config_custom:
+  []

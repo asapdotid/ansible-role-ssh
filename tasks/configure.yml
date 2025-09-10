@@ -79,7 +79,7 @@
   when:
     - ssh_user is defined
     - ssh_user | length > 0
-    - not ssh_user.manage_ssh_key
+    - not ssh_user.manage_ssh_key | bool
     - ssh_user.ssh_key_type is defined
     - ssh_user.ssh_key_type in ssh_key_types
   block:
@@ -139,7 +139,8 @@
       no_log: true
       failed_when: false
       register: ssh_public_key_setup
-      when: creating_public_key_file.changed # noqa: no-handler
+      when:
+        - creating_public_key_file.changed # noqa: no-handler
 
     - name: Set authorized key taken from file for user {{ ssh_user.name }}
       ansible.posix.authorized_key:
