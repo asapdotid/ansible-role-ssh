@@ -41,6 +41,7 @@
 | `ssh_password_authentication` | `"no"`  | Secure SSH connection password authentication                       |
 | `ssh_permit_root_login`       | `"yes"` | Secure SSH connection root permissions                              |
 | `ssh_allow_users`             | `[]`    | Secure SSH user authentications based on username and/or IP address |
+| `ssh_allow_group_users`       | `[]`    | Secure SSH user authentications based on group user                 |
 | `ssh_usedns`                  | `"no"`  | Secure SSH connection use dns                                       |
 | `ssh_permit_empty_password`   | `"no"`  | Secure SSH connection with empety password                          |
 | `ssh_challenge_response_auth` | `"no"`  | Secure SSH connection challege response auth                        |
@@ -55,10 +56,9 @@
 
 ### Set Banner
 
-| Name                        | Default    | Description                   |
-| --------------------------- | ---------- | ----------------------------- |
-| `ssh_custom_banner_enabled` | `false`    | Secure SSH custom banner      |
-| `ssh_custom_banner_text`    | `asaplabs` | Secure SSH custom banner text |
+| Name                         | Default    | Description                      |
+| ---------------------------- | ---------- | -------------------------------- |
+| `ssh_custom_banner_org_text` | `asaplabs` | Secure SSH custom banner initial |
 
 ### SSH config for users
 
