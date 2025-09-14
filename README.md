@@ -41,23 +41,24 @@
 | `ssh_password_authentication` | `"no"`  | Secure SSH connection password authentication                       |
 | `ssh_permit_root_login`       | `"yes"` | Secure SSH connection root permissions                              |
 | `ssh_allow_users`             | `[]`    | Secure SSH user authentications based on username and/or IP address |
+| `ssh_allow_group_users`       | `[]`    | Secure SSH user authentications based on group user                 |
 | `ssh_usedns`                  | `"no"`  | Secure SSH connection use dns                                       |
 | `ssh_permit_empty_password`   | `"no"`  | Secure SSH connection with empety password                          |
 | `ssh_challenge_response_auth` | `"no"`  | Secure SSH connection challege response auth                        |
 | `ssh_gss_api_authentication`  | `"no"`  | Secure SSH connection using GSSAPI to authenticate                  |
 | `ssh_x11_forwarding`          | `"no"`  | Secure SSH connection X11 forwarding working                        |
-| `ssh_allow_tcp_forwarding`    | `"no"`  | Secure SSH port forwarding                                          |
 | `ssh_allow_agent_forwarding`  | `"no"`  | Secure SSH simplify deploying to a server                           |
+| `ssh_allow_tcp_forwarding`    | `"no"`  | Secure SSH port forwarding                                          |
+| `ssh_permit_tunnel`           | `"no"`  | Secure SSH Permit tunneling                                         |
 | `ssh_permit_user_env`         | `"no"`  | Secure SSH set variables for remote commands                        |
 | `ssh_client_alive_interval`   | `300`   | Secure SSH sets a timeout interval                                  |
 | `ssh_client_alive_count_max`  | `3`     | Secure SSH sets the number of server alive messages                 |
 
 ### Set Banner
 
-| Name                        | Default    | Description                   |
-| --------------------------- | ---------- | ----------------------------- |
-| `ssh_custom_banner_enabled` | `false`    | Secure SSH custom banner      |
-| `ssh_custom_banner_text`    | `asaplabs` | Secure SSH custom banner text |
+| Name                         | Default    | Description                      |
+| ---------------------------- | ---------- | -------------------------------- |
+| `ssh_custom_banner_org_text` | `asaplabs` | Secure SSH custom banner initial |
 
 ### SSH config for users
 

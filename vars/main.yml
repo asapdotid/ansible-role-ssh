@@ -6,10 +6,14 @@ ssh_key_types:
   - ecdsa
   - ed25519
 
-__ssh_root_default_vars:
+__ssh_user_root_default:
   - name: root
     home_dir: "/"
     ssh_key_type: rsa
-    manage_ssh_key: yes
+    manage_ssh_key: true
 
-ssh_setup_user_root: ["{{ __ssh_root_default_vars | combine(ssh_user_root, list_merge='append_rp') }}"]
+ssh_user_root_setup:
+  [
+    "{{ __ssh_user_root_default | combine(ssh_user_root, list_merge='append_rp') }}",
+  ]
+
