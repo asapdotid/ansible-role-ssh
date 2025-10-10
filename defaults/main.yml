@@ -35,6 +35,7 @@ ssh_port: 22
 ssh_max_auth_tries: 3
 ssh_login_grace_time: 30
 ssh_password_authentication: "no"
+ssh_pubkey_authentication: "yes"
 ssh_permit_root_login: "yes"
 ssh_allow_users: []
 ssh_allow_group_users: []

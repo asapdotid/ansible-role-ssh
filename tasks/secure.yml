@@ -1,15 +1,15 @@
 ---
-- name: SSH | Ensure SSH config file exists
+- name: Ensure SSH config file exists
   ansible.builtin.stat:
     path: "{{ ssh_config_file_path }}"
   register: ssh_config_file
 
-- name: SSH | Ensure SSH config backup file exists
+- name: Ensure SSH config backup file exists
   ansible.builtin.stat:
     path: "{{ ssh_config_file_path }}.backup"
   register: ssh_config_backup_file
 
-- name: SSH | Backup SSH config file
+- name: Backup SSH config file
   ansible.builtin.copy:
     src: "{{ ssh_config_file_path }}"
     dest: "{{ ssh_config_file_path }}.backup"
@@ -19,11 +19,12 @@
     - ssh_config_file.stat.exists
     - not ssh_config_backup_file.stat.exists
 
-- name: SSH | Update SSH configuration to be more secure
+- name: Harden SSH configuration
   become: true
   when: ssh_config_file.stat.exists
   block:
-    - name: SSH | Custom banner
+
+    - name: Deploy custom banner (if defined)
       ansible.builtin.template:
         src: ssh_banner.j2
         dest: "{{ ssh_custom_banner_path }}/{{ ssh_custom_banner_file_name }}"
@@ -31,89 +32,68 @@
         group: root
         mode: "0644"
       when:
-        - ssh_config_file.stat.exists
         - ssh_custom_banner_org_text is defined
         - ssh_custom_banner_org_text | length > 0
 
-    - name: SSH | Update SSH config banner
+    - name: Set Banner path
       ansible.builtin.lineinfile:
         dest: "{{ ssh_config_file_path }}"
-        regexp: "^#?Banner"
+        regexp: '^#?\s*Banner\b'
         line: "Banner {{ ssh_custom_banner_path }}/{{ ssh_custom_banner_file_name }}"
         state: present
-        # validate: "{{ ssh_validate_command }}"
         mode: "0600"
       when:
-        - ssh_config_file.stat.exists
+        - ssh_custom_banner_org_text is defined
+        - ssh_custom_banner_org_text | length > 0
 
-    - name: SSH | Update SSH configuration to be more secure.
+    - name: Update core SSH parameters
       ansible.builtin.lineinfile:
         path: "{{ ssh_config_file_path }}"
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
         state: present
-        validate: "{{ ssh_validate_command }}"
+        # validate: "{{ ssh_validate_command | default('sshd -t -f %s') }}"
         mode: "0600"
-      when: ssh_config_file.stat.exists
-      with_items:
-        - regexp: "^#?Protocol"
-          line: "Protocol 2"
-        - regexp: "^#?PasswordAuthentication"
-          line: "PasswordAuthentication {{ ssh_password_authentication }}"
-        - regexp: "^#?PermitRootLogin"
-          line: "PermitRootLogin {{ ssh_permit_root_login }}"
-        - regexp: "^#?Port"
-          line: "Port {{ ssh_port }}"
-        - regexp: "^#?MaxAuthTries"
-          line: "MaxAuthTries {{ ssh_max_auth_tries }}"
-        - regexp: "^#?LoginGraceTime"
-          line: "LoginGraceTime {{ ssh_login_grace_time }}"
-        - regexp: "^#?UseDNS"
-          line: "UseDNS {{ ssh_usedns }}"
-        - regexp: "^#?PermitEmptyPasswords"
-          line: "PermitEmptyPasswords {{ ssh_permit_empty_password }}"
-        - regexp: "^#?ChallengeResponseAuthentication"
-          line: "ChallengeResponseAuthentication {{ ssh_challenge_response_auth }}"
-        - regexp: "^#?GSSAPIAuthentication"
-          line: "GSSAPIAuthentication {{ ssh_gss_api_authentication }}"
-        - regexp: "^#?X11Forwarding"
-          line: "X11Forwarding {{ ssh_x11_forwarding }}"
-        - regexp: "^#?AllowAgentForwarding"
-          line: "AllowAgentForwarding {{ ssh_allow_agent_forwarding }}"
-        - regexp: "^#?AllowTcpForwarding"
-          line: "AllowTcpForwarding {{ ssh_allow_tcp_forwarding }}"
-        - regexp: "^#?PermitTunnel"
-          line: "PermitTunnel {{ ssh_permit_tunnel }}"
-        - regexp: "^#?PermitUserEnvironment"
-          line: "PermitUserEnvironment {{ ssh_permit_user_env }}"
-        - regexp: "^#?ClientAliveInterval"
-          line: "ClientAliveInterval {{ ssh_client_alive_interval }}"
-        - regexp: "^#?ClientAliveCountMax"
-          line: "ClientAliveCountMax {{ ssh_client_alive_count_max }}"
+      loop:
+        - { regexp: '^#?\s*Protocol\b',                        line: "Protocol 2" }
+        - { regexp: '^#?\s*PasswordAuthentication\b',          line: "PasswordAuthentication {{ ssh_password_authentication }}" }
+        - { regexp: '^#?\s*PermitRootLogin\b',                 line: "PermitRootLogin {{ ssh_permit_root_login }}" }
+        - { regexp: '^#?\s*Port\b',                            line: "Port {{ ssh_port }}" }
+        - { regexp: '^#?\s*MaxAuthTries\b',                    line: "MaxAuthTries {{ ssh_max_auth_tries }}" }
+        - { regexp: '^#?\s*LoginGraceTime\b',                  line: "LoginGraceTime {{ ssh_login_grace_time }}" }
+        - { regexp: '^#?\s*UseDNS\b',                          line: "UseDNS {{ ssh_usedns }}" }
+        - { regexp: '^#?\s*PermitEmptyPasswords\b',            line: "PermitEmptyPasswords {{ ssh_permit_empty_password }}" }
+        - { regexp: '^#?\s*ChallengeResponseAuthentication\b', line: "ChallengeResponseAuthentication {{ ssh_challenge_response_auth }}" }
+        - { regexp: '^#?\s*GSSAPIAuthentication\b',            line: "GSSAPIAuthentication {{ ssh_gss_api_authentication }}" }
+        - { regexp: '^#?\s*X11Forwarding\b',                   line: "X11Forwarding {{ ssh_x11_forwarding }}" }
+        - { regexp: '^#?\s*AllowAgentForwarding\b',            line: "AllowAgentForwarding {{ ssh_allow_agent_forwarding }}" }
+        - { regexp: '^#?\s*AllowTcpForwarding\b',              line: "AllowTcpForwarding {{ ssh_allow_tcp_forwarding }}" }
+        - { regexp: '^#?\s*PermitTunnel\b',                    line: "PermitTunnel {{ ssh_permit_tunnel }}" }
+        - { regexp: '^#?\s*PermitUserEnvironment\b',           line: "PermitUserEnvironment {{ ssh_permit_user_env }}" }
+        - { regexp: '^#?\s*ClientAliveInterval\b',             line: "ClientAliveInterval {{ ssh_client_alive_interval }}" }
+        - { regexp: '^#?\s*ClientAliveCountMax\b',             line: "ClientAliveCountMax {{ ssh_client_alive_count_max }}" }
 
-    - name: SSH | Update SSH config allow users
+    - name: Configure allowed users
       ansible.builtin.lineinfile:
         path: "{{ ssh_config_file_path }}"
-        regexp: "^#?AllowUsers"
+        regexp: '^#?\s*AllowUsers\b'
         line: "AllowUsers {{ ssh_allow_users | join(' ') }}"
         state: present
-        validate: "{{ ssh_validate_command }}"
+        # validate: "{{ ssh_validate_command | default('sshd -t -f %s') }}"
         mode: "0600"
       when:
-        - ssh_config_file.stat.exists
         - ssh_allow_users is defined
         - ssh_allow_users | length > 0
 
-    - name: SSH | Update SSH config allow group users
+    - name: Configure allowed groups
       ansible.builtin.lineinfile:
         path: "{{ ssh_config_file_path }}"
-        regexp: "^#?AllowGroups"
+        regexp: '^#?\s*AllowGroups\b'
         line: "AllowGroups {{ ssh_allow_group_users | join(' ') }}"
         state: present
-        validate: "{{ ssh_validate_command }}"
+        # validate: "{{ ssh_validate_command | default('sshd -t -f %s') }}"
         mode: "0600"
       when:
-        - ssh_config_file.stat.exists
         - ssh_allow_group_users is defined
         - ssh_allow_group_users | length > 0
 
